@@ -79,7 +79,8 @@ export default function Navigo(appRoute?: string, options?: RouterOptions) {
     path: string | RegExp,
     handler: Handler,
     hooks: RouteHooks[],
-    name?: string
+    name?: string,
+    meta?: Map<string, object>,
   ): Route {
     path = isString(path) ? composePathWithRoot(path as string) : path;
     return {
@@ -87,6 +88,7 @@ export default function Navigo(appRoute?: string, options?: RouterOptions) {
       path,
       handler,
       hooks: accumulateHooks(hooks),
+      meta,
     };
   }
 
@@ -101,8 +103,8 @@ export default function Navigo(appRoute?: string, options?: RouterOptions) {
         if (typeof path[p] === "function") {
           this.on(p, path[p]);
         } else {
-          const { uses: handler, as: name, hooks } = path[p];
-          routes.push(createRoute(p, handler, [genericHooks, hooks], name));
+          const { uses: handler, as: name, hooks, meta } = path[p];
+          routes.push(createRoute(p, handler, [genericHooks, hooks], name, meta));
         }
       });
       return this;
@@ -112,7 +114,7 @@ export default function Navigo(appRoute?: string, options?: RouterOptions) {
       path = root;
     }
     routes.push(
-      createRoute(path as string | RegExp, handler, [genericHooks, hooks])
+      createRoute(path as string | RegExp, handler, [genericHooks, hooks], null)
     );
     return this;
   }
@@ -224,12 +226,13 @@ export default function Navigo(appRoute?: string, options?: RouterOptions) {
     }
     this.destroyed = destroyed = true;
   }
-  function notFound(handler, hooks?: RouteHooks) {
+  function notFound(handler, hooks?: RouteHooks, meta?: Map<string, object>) {
     self._notFoundRoute = createRoute(
       "*",
       handler,
       [genericHooks, hooks],
-      "__NOT_FOUND__"
+      "__NOT_FOUND__",
+      meta
     );
     return this;
   }

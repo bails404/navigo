@@ -3,6 +3,7 @@ export type Route = {
   path: string | RegExp;
   handler: Handler;
   hooks: RouteHooksStorage;
+  meta?: Map<string, object>;
 };
 export type Handler = (match?: Match) => void;
 export type Match = {
